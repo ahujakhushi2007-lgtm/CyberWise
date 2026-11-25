@@ -1,5 +1,7 @@
 bin/
 *.class
-*.csv
-*.txt
+*.log
 .DS_Store
+.idea/
+*.iml
+.vscode/

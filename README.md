@@ -1,128 +1,198 @@
-# 🛡️ CyberWise — Java Terminal Backend Edition
+# 🛡️ CyberWise — Explainable India-First Scam Detector (Core Java Unit 1 & 2 Edition)
 
-> **Course: 25CSE0202 / Programming in Java (Chitkara University)**  
-> **Milestone: Continuous Assessment 3 (CA-3) Project Evaluation (Lectures 1–54)**  
-> **Architecture: Pure Core Java Console Application • Zero External JAR Dependencies**
+> **Pure Core Java Console Application** built strictly with **Unit 1 & Unit 2 Java OOP Syllabus Concepts** — zero SQL/databases, zero external APIs, zero GUI/web frameworks, and **40 modular Java classes**.
 
----
-
-## 📌 Project Overview
-**CyberWise** is an India-first terminal-based cybersecurity detection engine developed in Java. It analyzes URLs, SMS, WhatsApp messages, and raw emails to compute an animated risk score (0–100), issue forensic verdicts (`SAFE`, `SUSPICIOUS`, `DANGEROUS`), and flag sophisticated fraud patterns including:
-- **Digital Arrest & Police Extortion Threats** (CBI / Supreme Court video custody scams)
-- **UPI PIN Traps & Reverse QR Code Phishing** (PhonePe / GPay fake cashback)
-- **Electricity Disconnection 9:30 PM Threats** (Devanagari Hindi & Hinglish Discom notices)
-- **Fake Bank / SIM KYC Suspension Notices** (SBI YONO, HDFC, PAN card update traps)
-- **Telegram Part-time Tasks & YouTube Like Scams** (₹3,000–₹8,000 daily reward funnels)
-- **RFC 822 Email Spoofing & Header Discrepancies** (SPF/DKIM/DMARC failures, display-name spoofing)
+**Pitch:** *"An explainable, India-first scam detector that tells you not just whether a link, SMS, or email is a scam, but exactly why."*
 
 ---
 
-## 🎓 Syllabus Mapping to Lectures 1–54 (Continuous Assessment 1 to 3)
+## 1. Problem Statement
+Digital fraud in India (fake SBI/HDFC KYC updates, UPI Collect/QR traps, "Digital Arrest" CBI/police extortion calls, FedEx/customs parcel scams, KBC lotteries, and Telegram task scams) often mixes English, Hinglish, and lookalike domains (`sbi-kyc-update.xyz`, `paytm-support.in.net`). Many users cannot tell why a message is dangerous before clicking or sharing an OTP/UPI PIN.
 
-This project strictly adheres to the Chitkara University Course Plan and utilizes only topics taught up to **Lecture 54**:
-
-| Module & Lectures | Syllabus Topics | Implementation in CyberWise |
-| :--- | :--- | :--- |
-| **Lect. 1–5** | OOP Concepts, Classes, Objects, Methods, Constructors, `this`/`static`, Inheritance, Polymorphism, Abstraction, Interfaces | `ThreatAnalyzer<T>` interface, `BaseAnalyzer<T>` abstract class extended by `UrlAnalyzer` & `TextAnalyzer`, encapsulation in `Finding` and `AnalysisResult`. |
-| **Lect. 6–9** | String Immutability, String pool, search, manipulation, formatting, `StringBuilder`, wrapper classes | Levenshtein distance matrix algorithm, lookalike character normalization (`rn`→`m`, `0`→`o`), ASCII banner & progress gauge formatting via `StringBuilder`. |
-| **Lect. 10–12** | Checked & unchecked exceptions, `try-catch-finally`, exception propagation, custom exceptions | `InvalidInputException` (checked exception for input validation) and `ScanExecutionException` (runtime exception). |
-| **Lect. 13–15** | Integrated console program, input validation, debugging, test structures | Menu-driven `TerminalUI` with ANSI color formatting, validation checks, and scanner error handling. |
-| **Lect. 16–19** | Collections Framework (`ArrayList`, `HashSet`, `LinkedHashSet`) | `ArrayList` for storing red flag findings, `HashSet` for blacklisted TLDs (`.xyz`, `.top`, `.icu`) and shorteners. |
-| **Lect. 20–22** | `HashMap`, `LinkedHashMap`, traversal using iterators | `BrandRegistry` dictionary storing 45+ Indian banks and brands with official domains, keywords, and typos. |
-| **Lect. 23–25** | `Comparable`, `Comparator`, sorting, Collections utilities | `AnalysisResult` implements `Comparable<AnalysisResult>` for natural descending risk ranking; `Finding` sorted by severity comparator. |
-| **Lect. 26–29** | Multithreading, `Thread`, `Runnable`, `start()`, `run()`, `join()`, `sleep()`, daemon threads, priorities | `ConcurrentBatchScanner` runs 4 parallel worker threads to scan URLs concurrently with `.join()`; `RadarProgressAnimator` runs on a background Daemon Thread. |
-| **Lect. 30–31** | Synchronization, race conditions, critical sections, `synchronized` blocks | `ConcurrentBatchScanner` uses `synchronized(urlQueue)` and `synchronized(synchronizedResults)` to safely prevent race conditions during parallel processing. |
-| **Lect. 43–46** | Lambda Expressions & Stream API (`filter()`, `map()`, `sorted()`, method references) | `BenchmarkRunner` uses Stream pipelines and lambdas to evaluate 35 test cases, filter outcomes, and calculate accuracy, precision, and recall. |
-| **Lect. 47–48** | Generics, type safety, diamond operator `<>` | Generic interface `ThreatAnalyzer<T>` and abstract class `BaseAnalyzer<T>` enabling reusable typed threat analyzers. |
-| **Lect. 49–54** | File Handling, `BufferedReader`, `BufferedWriter`, try-with-resources, CSV integration | `FileReportManager` uses `BufferedWriter` with try-with-resources to persist audit trails into `cyberwise_history.csv` and export formatted `threat_report.txt`. |
+## 2. Objectives & Scope
+- **Explainable Scoring (0–100):** Classify inputs as `SAFE` (`0–30`), `SUSPICIOUS` (`31–65`), or `DANGEROUS` (`66–100`) using a transparent 2D risk calibration matrix.
+- **Inline Red-Flag Highlighting:** Highlight exact matched fraud phrases/URLs inside the original message in **bold red** ANSI colors with plain-English explanations.
+- **India-First Threat Coverage:** Detect fake Indian bank/fintech domains, Hinglish coercion, OTP/PIN/CVV theft, UPI collect traps, Digital Arrest threats, courier customs scams, electricity disconnection scams, and Telegram task scams.
+- **Educational & Actionable:** Provide customized India-first next steps (`https://cybercrime.gov.in`, helpline `1930`) plus a built-in Scam Awareness Library.
+- **Scope:** Console-based, offline Core Java application adhering strictly to Unit 1 (OOP, Strings, 2D Arrays, Wrapper classes) and Unit 2 (Exceptions, Validation, Testing, Collections Framework).
 
 ---
 
-## 📂 Directory Structure
+## 3. Architecture
 
 ```text
-java/
-├── src/
-│   └── com/
-│       └── cyberwise/
-│           ├── analyzer/
-│           │   ├── ThreatAnalyzer.java        # Generic Interface (Lect. 1-5, 47-48)
-│           │   ├── BaseAnalyzer.java          # Abstract Class with validation (Lect. 1-5)
-│           │   ├── UrlAnalyzer.java           # Levenshtein, Punycode, Typosquatting (Lect. 6-9)
-│           │   ├── TextAnalyzer.java          # Regex coercion & Indian threat vectors (Lect. 6-9)
-│           │   └── EmailAnalyzer.java         # RFC 822 parser & SPF/DKIM verification
-│           ├── benchmark/
-│           │   ├── BenchmarkCase.java         # Model for test samples
-│           │   └── BenchmarkRunner.java       # Stream API evaluation of 35 cases (Lect. 43-46)
-│           ├── cli/
-│           │   └── TerminalUI.java            # Console Menu with ANSI colors & ASCII gauge (Lect. 13-15)
-│           ├── concurrency/
-│           │   ├── ConcurrentBatchScanner.java # 4-Thread parallel batch scanner (Lect. 26-31)
-│           │   └── RadarProgressAnimator.java # Daemon Thread with sleep() for radar (Lect. 28-29)
-│           ├── data/
-│           │   └── BrandRegistry.java         # 45+ Brands, HashMap/HashSet registries (Lect. 16-22)
-│           ├── exception/
-│           │   ├── InvalidInputException.java # Checked Custom Exception (Lect. 10-12)
-│           │   └── ScanExecutionException.java # Unchecked Custom Exception (Lect. 10-12)
-│           ├── model/
-│           │   ├── AnalysisResult.java        # Implements Comparable<AnalysisResult> (Lect. 23-25)
-│           │   ├── Brand.java                 # Model entity
-│           │   ├── Finding.java               # Red flag evidence entity
-│           │   └── Verdict.java               # Enum: SAFE, SUSPICIOUS, DANGEROUS
-│           ├── storage/
-│           │   └── FileReportManager.java     # BufferedReader/Writer CSV persistence (Lect. 49-54)
-│           └── Main.java                      # Console Application Entry Point
-├── run.sh                                     # 1-Click Launch Script (macOS / Linux)
-├── run.bat                                    # 1-Click Launch Script (Windows)
-└── README_JAVA.md                             # Academic Submission Guide & Documentation
++------------------------------------------------------------------------+
+|                        com.cyberwise.Main                              |
+|              CLI Args (--test / --demo) & Entry Point                  |
++-----------------------------------+------------------------------------+
+                                    |
+                                    v
++------------------------------------------------------------------------+
+|                    com.cyberwise.cli.ConsoleMenu                       |
+|   Menu [0-8] | Scanner Multi-Line Input | try-catch-finally & multi-catch
++-----------------------------------+------------------------------------+
+                                    |
+                                    v
++------------------------------------------------------------------------+
+|                   com.cyberwise.service.ScanService                    |
+|   History Queue (LinkedList) | ID Map (HashMap) | Stats (TreeMap)      |
++-----------------+----------------------------------+-------------------+
+                  |                                  |
+                  v                                  v
++-----------------------------------+   +--------------------------------+
+|  analyzer.AnalyzerFactory         |   | service.ReportFormatter        |
+|  Polymorphic ThreatAnalyzer       |   | StringBuilder + ANSI Highlight |
+|   ├─ LinkAnalyzer                 |   +--------------------------------+
+|   ├─ SmsTextAnalyzer              |
+|   └─ EmailAnalyzer (multilevel)   |
++-----------------+-----------------+
+                  |
+                  v
++------------------------------------------------------------------------+
+|  engine: TextSimilarityEngine (2D int[][] DP) | RuleMatcher            |
+|          RiskScoringMatrix (2D int[][] & String[][]) | NextStepsAdvisor|
+|  data:   BrandRepository | RuleRepository | AwarenessRepository        |
++------------------------------------------------------------------------+
 ```
 
 ---
 
-## ⚡ How to Compile and Run
+## 4. Syllabus Mapping (Unit 1 & Unit 2 — Class & Method Reference)
 
-### Option 1: Using the provided launcher script
+Every syllabus topic is implemented and also inspectable live inside the app via **Menu Option 8**.
+
+### Unit 1A – Object-Oriented Programming and Java Fundamentals
+| Syllabus Topic | Class(es) & Method(s) |
+| :--- | :--- |
+| **OOP Concepts & Object Modelling** | `BrandProfile`, `RedFlag`, `ScamRule`, `ScanResult`, `AwarenessArticle` |
+| **Classes, Objects, Methods & Constructors** | `RedFlag` (overloaded constructors), `ScanResult` (constructor + mutators), `BrandProfile` |
+| **`this` and `static` Keywords** | `ScanResult.nextScanId` (`static` counter), `this(...)` constructor chaining in `RedFlag`, `this.field` across models |
+| **Inheritance (Single & Multilevel)** | `AbstractThreatAnalyzer -> SmsTextAnalyzer -> EmailAnalyzer`; `CyberWiseException -> InvalidInputException / UnknownMenuOptionException / AwarenessNotFoundException` |
+| **Polymorphism (Method Overloading)** | `LinkAnalyzer.analyze(String)` vs `LinkAnalyzer.analyze(String, boolean)`; `ScanResult.addRedFlag(RedFlag)` vs `addRedFlag(String, ...)` |
+| **Polymorphism (Method Overriding)** | `LinkAnalyzer.validateInput()`, `LinkAnalyzer.performAnalysis()`, `SmsTextAnalyzer.performAnalysis()`, `EmailAnalyzer.performAnalysis()` (uses `super`), `RedFlag.compareTo()` |
+| **Abstraction & Interfaces** | `ThreatAnalyzer` (interface), `AbstractThreatAnalyzer` (abstract class with template method `analyze()` and abstract `performAnalysis()`) |
+
+### Unit 1B – Arrays, Strings, and Wrapper Classes
+| Syllabus Topic | Class(es) & Method(s) |
+| :--- | :--- |
+| **Multi-dimensional Arrays** | `TextSimilarityEngine.computeEditDistance()` (`int[][]` Levenshtein DP matrix), `RiskScoringMatrix.BASELINE_FLOOR_MATRIX` (`int[][]`) & `VERDICT_BANDS` (`String[][]`), `DemoSampleRepository.DEMO_MATRIX` (`String[][]`) |
+| **String Immutability & String Pool** | `TextSimilarityEngine.normalizeHomoglyphs()` & `TextSimilarityEngine.demonstrateStringPoolAndImmutability()` (`==` vs `.equals()`) |
+| **String Comparison, Searching & Manipulation** | `RuleMatcher.findPhraseWithBoundaries()` (`indexOf`, `substring`, `toLowerCase`), `RuleMatcher.extractUrls()` (`split`, `startsWith`, `contains`), `LinkAnalyzer.extractHost()` |
+| **String Formatting** | `ReportFormatter.formatScanReport()`, `TestRunner.runAll()`, `ConsoleMenu.handleViewHistoryAndStats()` (`String.format`, `printf`) |
+| **`StringBuilder` & `StringBuffer`** | `ReportFormatter.highlightRedFlags()` & `formatScanReport()` (`StringBuilder`); `ScanResult.traceLog`, `ScanService.sessionAuditLog`, `DebugTracer.SESSION_TRACE` (`StringBuffer`) |
+| **Wrapper Classes** | `InputValidator.parseMenuChoice()` (`Integer.parseInt`), `RuleMatcher.findPhraseWithBoundaries()` (`Character.isLetterOrDigit`), `Severity.fromWeight()` (`Integer.valueOf`), `LinkAnalyzer.isIpAddress()` (`Character.isDigit`) |
+
+### Unit 2A – Exception Handling, Validation, Debugging & Testing
+| Syllabus Topic | Class(es) & Method(s) |
+| :--- | :--- |
+| **Checked & Unchecked Exceptions** | Checked: `CyberWiseException`, `InvalidInputException`, `UnknownMenuOptionException`, `AwarenessNotFoundException`; Unchecked: `ScanLimitExceededException` |
+| **`try`, `catch`, `finally` & multi-catch** | `ConsoleMenu.start()` (`try-catch-finally`, `catch (UnknownMenuOptionException \| NumberFormatException e)`), `TestRunner.runAll()` |
+| **Exception Propagation, `throw` & `throws`** | `InputValidator` -> `AbstractThreatAnalyzer.analyze()` -> `ScanService.runScan()` -> `ConsoleMenu.start()` |
+| **Integrated Console Coding & Input Validation** | `ConsoleMenu`, `InputValidator.validateUrl()`, `InputValidator.validateNonEmpty()`, `InputValidator.parseMenuChoice()` |
+| **Debugging** | `DebugTracer.toggle()`, `DebugTracer.log()`, Option 8 diagnostic view |
+| **Test Cases** | `TestCase`, `TestResult`, `CyberWiseTestSuite.buildScanTestCases()`, `TestRunner.runAll()` (17 automated tests) |
+
+### Unit 2B – Collections Framework
+| Collection | Class & Usage Reason |
+| :--- | :--- |
+| **`ArrayList`** | `ScanResult.redFlags`, `RuleRepository.ALL_RULES`, `CyberWiseTestSuite` — indexed iteration & sorting |
+| **`LinkedList`** | `ScanService.scanHistoryQueue` — bounded recent scan queue using `addFirst()` / `removeLast()` |
+| **`HashSet`** | `BrandRepository.SUSPICIOUS_TLDS`, `URL_SHORTENERS`, `ALL_OFFICIAL_DOMAINS` — O(1) membership lookups |
+| **`LinkedHashSet`** | `ScanResult.triggeredCategories` — unique scam categories preserving detection order |
+| **`TreeSet`** | `ScanResult.uniqueMatchedTokens` — unique matched fraud tokens sorted alphabetically |
+| **`HashMap`** | `BrandRepository.BRAND_MAP`, `ScanService.scanByIdMap`, `NextStepsAdvisor.ADVICE_MAP` — fast key-value lookup |
+| **`LinkedHashMap`** | `AwarenessRepository.ORDERED_ARTICLES`, `RuleRepository.RULES_BY_CATEGORY`, `SyllabusTracker.TOPIC_TO_CODE_MAP` — preserves menu/display order |
+| **`TreeMap`** | `ScanService.categoryFrequencyMap` — category scan counts sorted alphabetically by category name |
+| **`Comparator` / `Comparable`** | `RedFlag implements Comparable<RedFlag>` and `RedFlagWeightComparator implements Comparator<RedFlag>` |
+
+---
+
+## 5. Project Structure (40 Classes)
+```text
+src/com/cyberwise/
+├── Main.java                                  # Entry point (--test, --demo, interactive mode)
+├── analyzer/
+│   ├── ThreatAnalyzer.java                    # Interface
+│   ├── AbstractThreatAnalyzer.java            # Abstract base template class
+│   ├── LinkAnalyzer.java                      # URL, IP, '@', TLD, shortener & 2D typo analysis
+│   ├── SmsTextAnalyzer.java                   # SMS/WhatsApp rules + embedded URL scanner
+│   ├── EmailAnalyzer.java                     # Multilevel inheritance adding header spoofing checks
+│   ├── AnalyzerFactory.java                   # Factory returning ThreatAnalyzer polymorphically
+│   └── RedFlagWeightComparator.java           # Comparator sorting RedFlags by weight
+├── cli/
+│   ├── AnsiPalette.java                       # ANSI color escape codes
+│   └── ConsoleMenu.java                       # Interactive Scanner menu (options 0-8)
+├── data/
+│   ├── BrandRepository.java                   # Official Indian banks/portals + suspicious TLDs
+│   ├── RuleRepository.java                    # India-first Hinglish/English scam rules
+│   ├── AwarenessRepository.java               # 6 educational India-first scam guides
+│   └── DemoSampleRepository.java              # 6 pre-loaded demo payloads
+├── engine/
+│   ├── TextSimilarityEngine.java              # 2D int[][] Levenshtein + String Pool demo
+│   ├── RuleMatcher.java                       # String searching & embedded URL extraction
+│   ├── RiskScoringMatrix.java                 # 2D int[][] & String[][] risk matrix
+│   ├── NextStepsAdvisor.java                  # Customized cybercrime.gov.in / 1930 advice
+│   └── SyllabusTracker.java                   # Live syllabus-to-class mapping
+├── exception/
+│   ├── CyberWiseException.java                # Base checked custom exception
+│   ├── InvalidInputException.java             # Checked input validation exception
+│   ├── UnknownMenuOptionException.java        # Checked invalid menu choice exception
+│   ├── AwarenessNotFoundException.java        # Checked missing article exception
+│   └── ScanLimitExceededException.java        # Unchecked length-limit exception
+├── model/
+│   ├── VerdictConstants.java                  # SAFE / SUSPICIOUS / DANGEROUS thresholds
+│   ├── ScamCategory.java                      # India-first scam category constants
+│   ├── Severity.java                          # LOW / MEDIUM / HIGH / CRITICAL helpers
+│   ├── BrandProfile.java                      # Brand entity (domains, keywords, typos)
+│   ├── RedFlag.java                           # Triggered rule evidence (Comparable)
+│   ├── ScamRule.java                          # Offline rule model
+│   ├── ScanResult.java                        # Encapsulated scan output
+│   └── AwarenessArticle.java                  # Awareness guide model
+├── service/
+│   ├── ScanService.java                       # Scan orchestration, LinkedList history, TreeMap stats
+│   ├── InputValidator.java                    # Wrapper-based validation & exception throwing
+│   ├── ReportFormatter.java                   # StringBuilder ANSI report & red-flag highlighter
+│   └── DebugTracer.java                       # Toggleable debug logger (StringBuffer)
+└── test/
+    ├── TestCase.java                          # Test specification model
+    ├── TestResult.java                        # Test execution outcome model
+    ├── CyberWiseTestSuite.java                # 12 curated scan cases
+    └── TestRunner.java                        # Built-in 17-test runner (--test / Option 7)
+```
+
+---
+
+## 6. Setup & How to Run
+
+### Prerequisites
+- Java JDK 17+ (`javac` and `java`)
+
+### Compile & Run
 ```bash
-cd java
 ./run.sh
 ```
-*(On Windows: double-click `run.bat` or run `run.bat` from Command Prompt)*
-
-### Option 2: Using standard javac command
+Or manually:
 ```bash
-cd java
 mkdir -p bin
-javac -d bin $(find src -name "*.java")
+javac -encoding UTF-8 -d bin $(find src -name "*.java")
 java -cp bin com.cyberwise.Main
 ```
 
----
-
-## 📊 Empirical Benchmark Evaluation (35 Curated Test Cases)
-
-Run Option `6` in the main menu to execute the benchmark suite live:
-
-| Metric | Score | Validation Standard |
-| :--- | :--- | :--- |
-| **Accuracy** | **100.00%** | (TP + TN) / Total (35/35 correct) |
-| **Precision** | **100.00%** | Zero false alarms on legitimate banking notifications |
-| **Recall** | **100.00%** | Zero missed fraud attempts |
-| **F1 Score** | **100.00%** | Harmonic mean of precision & recall |
-| **Evaluated Cases** | **35 Samples** | 19 Malicious payloads + 16 Authentic samples |
+### Quick Modes
+```bash
+./run.sh --test    # Run all 17 built-in unit tests
+./run.sh --demo    # Run all 6 pre-loaded India scam & safe demo cases
+```
 
 ---
 
-## 💡 Common Viva Questions & Answers for Students
-
-1. **Q: Why did you use an interface `ThreatAnalyzer<T>` and an abstract class `BaseAnalyzer<T>`?**  
-   *A:* An interface establishes a contract ensuring every threat detector implements `analyze()`, while `BaseAnalyzer<T>` provides code reuse via the Template Method pattern, performing standard input validation before delegating to `doAnalyze()`.
-
-2. **Q: How does `Comparable<AnalysisResult>` work in your project?**  
-   *A:* In `AnalysisResult`, `compareTo()` compares risk scores in reverse order (`Integer.compare(other.riskScore, this.riskScore)`), so calling `Collections.sort()` automatically ranks the highest-risk threats at the top.
-
-3. **Q: How did you handle multithreading and prevent race conditions?**  
-   *A:* In `ConcurrentBatchScanner`, multiple worker threads retrieve URLs from a shared queue and store results in a shared list. We wrapped queue access and result accumulation inside `synchronized` blocks to ensure mutual exclusion and prevent race conditions.
-
-4. **Q: How is file handling implemented safely?**  
-   *A:* In `FileReportManager`, we use `BufferedWriter` wrapped inside a `try-with-resources` block, ensuring that stream file descriptors are automatically closed even if an `IOException` occurs.
-
+## 7. Current Status, Milestones & Pending Work
+- **Completed Milestones:**
+  - M1: Domain models, constants, and 5 checked/unchecked custom exceptions
+  - M2: India-first brand registry, offline Hinglish/English rules, awareness library, and demo samples
+  - M3: 2D array Levenshtein similarity engine, String Pool diagnostics, and 2D risk calibration matrix
+  - M4: Interface + Abstract + Multilevel inheritance analyzers (`LinkAnalyzer`, `SmsTextAnalyzer`, `EmailAnalyzer`) and `AnalyzerFactory`
+  - M5: Interactive ANSI console menu, red-flag highlighter, `LinkedList` history, `TreeMap` analytics, and 17-case built-in test runner
+- **Pending / Future Enhancements (Beyond Unit 1 & 2 Scope):**
+  - Persistence via SQLite/File I/O once covered in later units
+  - Optional external AI/vision integration for screenshot OCR
