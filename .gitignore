@@ -1,6 +1,7 @@
 bin/
 *.class
 *.log
+*.zip
 .DS_Store
 .idea/
 *.iml
